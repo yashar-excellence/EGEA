@@ -9,38 +9,50 @@
   --font-cairo: 'Cairo', sans-serif;
 }
 
-.light-mode {
-  --foreground-rgb: 30, 20, 5;
-  --background-start-rgb: 250, 247, 240;
-  --background-end-rgb: 245, 238, 220;
-  --card-bg: rgba(255, 252, 244, 0.85);
-  --card-border: rgba(212, 160, 23, 0.25);
-  --text-muted: rgba(80, 60, 20, 0.6);
-  --glass-bg: rgba(255, 252, 244, 0.7);
-  --glass-border: rgba(212, 160, 23, 0.2);
+/* ===== LIGHT MODE ===== */
+.light-mode,
+.light-mode body {
+  background: #FAF6ED !important;
+  color: #1C150A !important;
 }
 
-.light-mode body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom, rgb(250,247,240), rgb(245,238,220));
+/* Override ALL dark section backgrounds */
+.light-mode section,
+.light-mode main,
+.light-mode header,
+.light-mode footer,
+.light-mode [class*="bg-slate"],
+.light-mode [class*="bg-gradient"] {
+  background: transparent !important;
 }
 
 .light-mode .glass {
-  background: rgba(255, 252, 244, 0.7);
-  border-color: rgba(212, 160, 23, 0.2);
+  background: rgba(255, 250, 238, 0.85) !important;
+  border-color: rgba(180, 130, 0, 0.25) !important;
+  color: #1C150A;
 }
 
 .light-mode .glass-crystal {
-  background: linear-gradient(135deg, rgba(255,252,244,0.9) 0%, rgba(255,248,230,0.75) 100%);
-  border-color: rgba(212, 160, 23, 0.25);
-  box-shadow: 0 8px 32px rgba(180, 130, 0, 0.1), inset 0 1px 0 rgba(255,255,255,0.6);
+  background: rgba(255, 252, 242, 0.92) !important;
+  border-color: rgba(180, 130, 0, 0.3) !important;
+  box-shadow: 0 4px 24px rgba(150, 100, 0, 0.12), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+  color: #1C150A;
 }
 
 .light-mode .glass-strong {
-  background: rgba(250, 247, 240, 0.92);
-  border-color: rgba(212, 160, 23, 0.2);
-  box-shadow: 0 8px 32px rgba(180, 130, 0, 0.1);
+  background: rgba(250, 246, 237, 0.97) !important;
+  border-color: rgba(180, 130, 0, 0.2) !important;
+  box-shadow: 0 4px 20px rgba(150, 100, 0, 0.1) !important;
 }
+
+/* Text overrides */
+.light-mode .text-white { color: #1C150A !important; }
+.light-mode .text-white\/50, .light-mode .text-white\/60, .light-mode .text-white\/40 { color: rgba(28,21,10,0.55) !important; }
+.light-mode .text-white\/70 { color: rgba(28,21,10,0.7) !important; }
+.light-mode .text-white\/30 { color: rgba(28,21,10,0.4) !important; }
+
+/* absolute bg divs inside sections */
+.light-mode .absolute.inset-0 { background: transparent !important; }
 
 * {
   font-family: var(--font-cairo), system-ui, sans-serif;

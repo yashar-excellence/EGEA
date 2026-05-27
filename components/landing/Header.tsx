@@ -17,19 +17,32 @@ export function Header() {
 
   useEffect(() => {
     const stored = localStorage.getItem('theme');
-    if (stored === 'light') { setLightMode(true); document.documentElement.classList.add('light-mode'); }
+    if (stored === 'light') {
+      setLightMode(true);
+      document.documentElement.classList.add('light-mode');
+      document.body.style.background = '#FAF6ED';
+      document.body.style.color = '#1C150A';
+    }
   }, []);
+
+  const applyTheme = (isLight: boolean) => {
+    if (isLight) {
+      document.documentElement.classList.add('light-mode');
+      document.body.style.background = '#FAF6ED';
+      document.body.style.color = '#1C150A';
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.remove('light-mode');
+      document.body.style.background = '';
+      document.body.style.color = '';
+      localStorage.setItem('theme', 'dark');
+    }
+  };
 
   const toggleTheme = () => {
     const next = !lightMode;
     setLightMode(next);
-    if (next) {
-      document.documentElement.classList.add('light-mode');
-      localStorage.setItem('theme', 'light');
-    } else {
-      document.documentElement.classList.remove('light-mode');
-      localStorage.setItem('theme', 'dark');
-    }
+    applyTheme(next);
   };
 
   const getDashboardForRole = (role: string) => {
