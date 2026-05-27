@@ -1,17 +1,56 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Save, FileText, Users, Award, TrendingUp, AlertTriangle, CheckCircle2, User } from 'lucide-react';
+import { ArrowRight, Save, FileText, Users, Award, TrendingUp, AlertTriangle, CheckCircle2, User, Loader2 } from 'lucide-react';
+import { Header } from '@/components/landing/Header';
 import { FEP_AREAS } from '@/lib/fep/axes';
 import { createSampleFEPSubmission, createBlankFEPEvaluation } from '@/lib/fep/sample';
 import { aggregateFEPScores, calculateEvaluatorScore } from '@/lib/fep/scoring';
 import type { FEPSubmission, FEPEvaluation } from '@/lib/fep/types';
 
-export function FEPPanelWorkspace() {
+interface Props { candidateId?: string; }
+
+export function FEPPanelWorkspace({ candidateId }: Props) {
   const [submission, setSubmission] = useState<FEPSubmission>(createSampleFEPSubmission());
   const [activeEvaluatorIndex, setActiveEvaluatorIndex] = useState(0);
   const [showAggregated, setShowAggregated] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
+
+  useEffect(() => {
+    if (!candidateId) return;
+    Promise.all([
+      fetch(`/api/candidates/${candidateId}`).then(r => r.json()),
+      fetch(`/api/submissions/fep?candidate_id=${candidateId}`).then(r => r.json()),
+    ]).then(([candidateRes, fepRes]) => {
+      const c = candidateRes.data;
+      if (c) {
+        setSubmission(prev => ({
+          ...(fepRes.data?.[0]?.data ?? prev),
+          candidateName: c.name,
+          candidateCode: c.code,
+          candidateRole: c.role,
+          organization: c.organization,
+        }));
+      }
+    });
+  }, [candidateId]);
+
+  const handleSave = useCallback(async (status: 'draft' | 'submitted' = 'draft') => {
+    if (!candidateId) return;
+    setSaving(true);
+    try {
+      const result = aggregateFEPScores(submission);
+      await fetch('/api/submissions/fep', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ candidate_id: candidateId, data: submission, total_score: result.percentage, status }),
+      });
+      setSaveMsg(status === 'submitted' ? '✅ تم رفع التقييم' : '✅ تم الحفظ');
+    } catch { setSaveMsg('❌ خطأ في الحفظ'); }
+    finally { setSaving(false); setTimeout(() => setSaveMsg(''), 3000); }
+  }, [candidateId, submission]);
 
   const result = useMemo(() => aggregateFEPScores(submission), [submission]);
   const activeEvaluation = submission.evaluations[activeEvaluatorIndex];
@@ -54,14 +93,15 @@ export function FEPPanelWorkspace() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 pt-20 pb-12">
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="min-h-screen bg-slate-950 pb-12">
+      <Header />
+      <div className="max-w-7xl mx-auto px-4 pt-24">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Link href="/" className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
+            <Link href="/dashboard" className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
               <ArrowRight className="w-4 h-4" />
-              العودة للرئيسية
+              العودة للوحة التحكم
             </Link>
             <h1 className="text-3xl font-bold text-white">FEP — العرض النهائي للتميز</h1>
           </div>
@@ -73,10 +113,23 @@ export function FEPPanelWorkspace() {
               <TrendingUp className="w-4 h-4" />
               {showAggregated ? 'إخفاء النتائج' : 'عرض النتائج'}
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-gold-500 text-slate-950 rounded-lg font-bold hover:bg-gold-400 transition">
-              <Save className="w-4 h-4" />
-              حفظ
-            </button>
+            {saveMsg && <span className="text-sm font-medium text-emerald-400">{saveMsg}</span>}
+            {candidateId ? (
+              <>
+                <button onClick={() => handleSave('draft')} disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 glass rounded-lg text-white hover:bg-white/10 transition disabled:opacity-50">
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span className="hidden sm:inline">حفظ مسودة</span>
+                </button>
+                <button onClick={() => handleSave('submitted')} disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 bg-gold-500 text-slate-950 rounded-lg font-bold hover:bg-gold-400 transition disabled:opacity-50">
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  رفع التقييم
+                </button>
+              </>
+            ) : (
+              <span className="text-amber-400 text-sm glass px-3 py-2 rounded-lg">وضع المعاينة</span>
+            )}
           </div>
         </div>
 

@@ -1,18 +1,70 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Save, FileText, Download, AlertTriangle, CheckCircle2, User, Building2, Award } from 'lucide-react';
+import { ArrowRight, Save, FileText, Download, AlertTriangle, CheckCircle2, User, Building2, Award, Loader2 } from 'lucide-react';
+import { Header } from '@/components/landing/Header';
 import { OJT_AXES, getAxisById } from '@/lib/ojt/axes';
 import { createSampleOJTSubmission, createBlankAchievement } from '@/lib/ojt/sample';
 import { computeOJT, scoreToRating, achievementScore } from '@/lib/ojt/scoring';
 import type { OJTSubmission, Achievement } from '@/lib/ojt/types';
 
-export function AssessorWorkspace() {
+interface Props { candidateId?: string; }
+
+export function AssessorWorkspace({ candidateId }: Props) {
   const [submission, setSubmission] = useState<OJTSubmission>(createSampleOJTSubmission());
   const [activeAchievementIndex, setActiveAchievementIndex] = useState(0);
   const [activeAxisId, setActiveAxisId] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
+  const [loadingCandidate, setLoadingCandidate] = useState(false);
+
+  useEffect(() => {
+    if (!candidateId) return;
+    setLoadingCandidate(true);
+    Promise.all([
+      fetch(`/api/candidates/${candidateId}`).then(r => r.json()),
+      fetch(`/api/submissions/ojt?candidate_id=${candidateId}`).then(r => r.json()),
+    ]).then(([candidateRes, ojtRes]) => {
+      const c = candidateRes.data;
+      if (c) {
+        setSubmission(prev => ({
+          ...(ojtRes.data?.[0]?.data ?? prev),
+          candidateName: c.name,
+          candidateCode: c.code,
+          candidateRole: c.role,
+          organization: c.organization,
+          candidateId: c.id,
+        }));
+      }
+    }).finally(() => setLoadingCandidate(false));
+  }, [candidateId]);
+
+  const handleSave = useCallback(async (status: 'draft' | 'submitted' = 'draft') => {
+    if (!candidateId) return;
+    setSaving(true);
+    setSaveMsg('');
+    try {
+      const result = computeOJT(submission);
+      await fetch('/api/submissions/ojt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidate_id: candidateId,
+          data: submission,
+          total_score: result.percentage,
+          status,
+        }),
+      });
+      setSaveMsg(status === 'submitted' ? '✅ تم رفع التقييم' : '✅ تم الحفظ');
+    } catch {
+      setSaveMsg('❌ خطأ في الحفظ');
+    } finally {
+      setSaving(false);
+      setTimeout(() => setSaveMsg(''), 3000);
+    }
+  }, [candidateId, submission]);
 
   const result = useMemo(() => computeOJT(submission), [submission]);
   const activeAchievement = submission.achievements[activeAchievementIndex];
@@ -50,26 +102,42 @@ export function AssessorWorkspace() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 pt-20 pb-12">
-      {/* Header */}
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="min-h-screen bg-slate-950 pb-12">
+      <Header />
+      <div className="max-w-7xl mx-auto px-4 pt-24">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Link href="/" className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
+            <Link href="/dashboard" className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
               <ArrowRight className="w-4 h-4" />
-              العودة للرئيسية
+              العودة للوحة التحكم
             </Link>
             <h1 className="text-3xl font-bold text-white">أداة OJT — تقييم الأداء الفعلي الافتراضي</h1>
           </div>
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 glass rounded-lg text-white hover:bg-white/10 transition">
-              <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">تصدير JSON</span>
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-gold-500 text-slate-950 rounded-lg font-bold hover:bg-gold-400 transition">
-              <Save className="w-4 h-4" />
-              حفظ التقييم
-            </button>
+            {saveMsg && <span className="text-sm font-medium text-emerald-400">{saveMsg}</span>}
+            {candidateId && (
+              <>
+                <button
+                  onClick={() => handleSave('draft')}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 glass rounded-lg text-white hover:bg-white/10 transition disabled:opacity-50"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span className="hidden sm:inline">حفظ مسودة</span>
+                </button>
+                <button
+                  onClick={() => handleSave('submitted')}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 bg-gold-500 text-slate-950 rounded-lg font-bold hover:bg-gold-400 transition disabled:opacity-50"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  رفع التقييم
+                </button>
+              </>
+            )}
+            {!candidateId && (
+              <span className="text-amber-400 text-sm glass px-3 py-2 rounded-lg">وضع المعاينة</span>
+            )}
           </div>
         </div>
 

@@ -1,10 +1,14 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Save, FileText, MapPin, Users, ClipboardCheck, CheckCircle2, AlertTriangle, Calendar, User } from 'lucide-react';
+import { ArrowRight, Save, FileText, MapPin, Users, ClipboardCheck, CheckCircle2, AlertTriangle, Calendar, User, Loader2 } from 'lucide-react';
+import { Header } from '@/components/landing/Header';
 import { FV_AREAS } from '@/lib/fv/axes';
+import { computeFV } from '@/lib/fv/scoring';
 import type { FVSubmission, ChecklistItem, InterviewRecord } from '@/lib/fv/types';
+
+interface Props { candidateId?: string; }
 
 const defaultChecklist: ChecklistItem[] = [
   { id: 'c1', textAr: 'الإجراءات موثقة بشكل واضح', category: 'تنفيذ', status: 'not_checked' },
@@ -17,7 +21,7 @@ const defaultChecklist: ChecklistItem[] = [
   { id: 'c8', textAr: 'الأثر واضح ومُقاس', category: 'أثر', status: 'not_checked' },
 ];
 
-export function FVAssessorWorkspace() {
+export function FVAssessorWorkspace({ candidateId }: Props) {
   const [submission, setSubmission] = useState<FVSubmission>({
     candidateCode: 'C-2025-0014',
     candidateName: 'مؤمن الأحمري - سعاينة',
@@ -34,6 +38,42 @@ export function FVAssessorWorkspace() {
   });
 
   const [activeTab, setActiveTab] = useState<'scoring' | 'checklist' | 'interviews'>('scoring');
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
+
+  useEffect(() => {
+    if (!candidateId) return;
+    Promise.all([
+      fetch(`/api/candidates/${candidateId}`).then(r => r.json()),
+      fetch(`/api/submissions/fv?candidate_id=${candidateId}`).then(r => r.json()),
+    ]).then(([candidateRes, fvRes]) => {
+      const c = candidateRes.data;
+      if (c) {
+        setSubmission(prev => ({
+          ...(fvRes.data?.[0]?.data ?? prev),
+          candidateName: c.name,
+          candidateCode: c.code,
+          candidateRole: c.role,
+          organization: c.organization,
+        }));
+      }
+    });
+  }, [candidateId]);
+
+  const handleSave = useCallback(async (status: 'draft' | 'submitted' = 'draft') => {
+    if (!candidateId) return;
+    setSaving(true);
+    try {
+      const result = computeFV(submission);
+      await fetch('/api/submissions/fv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ candidate_id: candidateId, data: submission, total_score: result.percentage, status }),
+      });
+      setSaveMsg(status === 'submitted' ? '✅ تم رفع التقييم' : '✅ تم الحفظ');
+    } catch { setSaveMsg('❌ خطأ في الحفظ'); }
+    finally { setSaving(false); setTimeout(() => setSaveMsg(''), 3000); }
+  }, [candidateId, submission]);
   const [newInterview, setNewInterview] = useState({ stakeholderName: '', role: '', keyPoints: '', satisfaction: 3 as number });
 
   const updateScore = (areaId: string, rating: number) => {
@@ -69,26 +109,36 @@ export function FVAssessorWorkspace() {
   const checklistProgress = (checkedCount / submission.checklist.length) * 100;
 
   return (
-    <div className="min-h-screen bg-slate-950 pt-20 pb-12">
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="min-h-screen bg-slate-950 pb-12">
+      <Header />
+      <div className="max-w-7xl mx-auto px-4 pt-24">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Link href="/" className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
+            <Link href="/dashboard" className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
               <ArrowRight className="w-4 h-4" />
-              العودة للرئيسية
+              العودة للوحة التحكم
             </Link>
             <h1 className="text-3xl font-bold text-white">FV — الزيارة الميدانية</h1>
           </div>
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 glass rounded-lg text-white hover:bg-white/10 transition">
-              <FileText className="w-4 h-4" />
-              تصدير PDF
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-gold-500 text-slate-950 rounded-lg font-bold hover:bg-gold-400 transition">
-              <Save className="w-4 h-4" />
-              حفظ
-            </button>
+            {saveMsg && <span className="text-sm font-medium text-emerald-400">{saveMsg}</span>}
+            {candidateId ? (
+              <>
+                <button onClick={() => handleSave('draft')} disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 glass rounded-lg text-white hover:bg-white/10 transition disabled:opacity-50">
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span className="hidden sm:inline">حفظ مسودة</span>
+                </button>
+                <button onClick={() => handleSave('submitted')} disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 bg-gold-500 text-slate-950 rounded-lg font-bold hover:bg-gold-400 transition disabled:opacity-50">
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  رفع التقييم
+                </button>
+              </>
+            ) : (
+              <span className="text-amber-400 text-sm glass px-3 py-2 rounded-lg">وضع المعاينة</span>
+            )}
           </div>
         </div>
 

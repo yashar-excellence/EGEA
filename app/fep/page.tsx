@@ -22,6 +22,6 @@ export const metadata: Metadata = {
   description: 'أداة تقييم العرض النهائي للتميز',
 };
 
-export default function FEPPage() {
-  return <FEPPanelWorkspace />;
+export default function FEPPage({ searchParams }: { searchParams: { candidate?: string } }) {
+  return <FEPPanelWorkspace candidateId={searchParams.candidate} />;
 }

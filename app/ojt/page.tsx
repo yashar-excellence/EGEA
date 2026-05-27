@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import { Loader2 } from 'lucide-react';
 
@@ -17,11 +16,6 @@ const AssessorWorkspace = dynamic(
   }
 );
 
-export const metadata: Metadata = {
-  title: 'أداة OJT — تقييم الأداء الفعلي',
-  description: 'أداة تقييم الأداء الفعلي الافتراضي — 3 إنجازات × 8 محاور',
-};
-
-export default function OJTPage() {
-  return <AssessorWorkspace />;
+export default function OJTPage({ searchParams }: { searchParams: { candidate?: string } }) {
+  return <AssessorWorkspace candidateId={searchParams.candidate} />;
 }

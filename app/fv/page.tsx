@@ -22,6 +22,6 @@ export const metadata: Metadata = {
   description: 'أداة تقييم الزيارة الميدانية',
 };
 
-export default function FieldVisitPage() {
-  return <FVAssessorWorkspace />;
+export default function FieldVisitPage({ searchParams }: { searchParams: { candidate?: string } }) {
+  return <FVAssessorWorkspace candidateId={searchParams.candidate} />;
 }
