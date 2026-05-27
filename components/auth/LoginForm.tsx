@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { LogIn, Loader2 } from 'lucide-react';
 
 const quickLogins = [
@@ -41,7 +40,8 @@ export function LoginForm() {
     <div className="w-full max-w-md">
       {/* Logo */}
       <div className="flex justify-center mb-8">
-        <Image src="/logo-dark.png" alt="جائزة مصر للتميز الحكومي" width={220} height={75} className="h-16 w-auto" priority />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-dark.png" alt="جائزة مصر للتميز الحكومي" className="h-16 w-auto object-contain" />
       </div>
 
       <div className="p-8 rounded-2xl glass-crystal border border-white/10">
