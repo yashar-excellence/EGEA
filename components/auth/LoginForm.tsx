@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { LogIn, Loader2 } from 'lucide-react';
-import { LOGO_DARK } from '@/lib/logoData';
+import { LogoSmall } from '@/components/Logo';
 
 const quickLogins = [
   { label: 'مدير النظام', email: 'admin@egea.gov.eg', password: 'admin123', color: 'text-gold-400' },
@@ -41,8 +41,7 @@ export function LoginForm() {
     <div className="w-full max-w-md">
       {/* Logo */}
       <div className="flex justify-center mb-8">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={LOGO_DARK} alt="جائزة مصر للتميز الحكومي" className="h-16 w-auto object-contain" />
+        <LogoSmall />
       </div>
 
       <div className="p-8 rounded-2xl glass-crystal border border-white/10">
