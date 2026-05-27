@@ -1,18 +1,36 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import { Menu, User, LogOut, Settings, ChevronDown, Sparkles } from 'lucide-react';
+import { Menu, User, LogOut, Settings, ChevronDown, Sun, Moon } from 'lucide-react';
 import { LogoLink } from '@/components/Logo';
 
 export function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [lightMode, setLightMode] = useState(false);
   const { data: session, status } = useSession();
-  
+
   const isAuthenticated = status === 'authenticated';
   const user = session?.user;
+
+  useEffect(() => {
+    const stored = localStorage.getItem('theme');
+    if (stored === 'light') { setLightMode(true); document.documentElement.classList.add('light-mode'); }
+  }, []);
+
+  const toggleTheme = () => {
+    const next = !lightMode;
+    setLightMode(next);
+    if (next) {
+      document.documentElement.classList.add('light-mode');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.remove('light-mode');
+      localStorage.setItem('theme', 'dark');
+    }
+  };
 
   const getDashboardForRole = (role: string) => {
     if (role === 'admin') return '/admin';
@@ -26,7 +44,16 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <LogoLink />
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="w-9 h-9 flex items-center justify-center rounded-lg glass hover:bg-white/10 transition text-white/60 hover:text-gold-400"
+            title={lightMode ? 'الوضع الداكن' : 'الوضع الفاتح'}
+          >
+            {lightMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </button>
+
           {status === 'loading' ? (
             <div className="w-6 h-6 border-2 border-gold-400/30 border-t-gold-400 rounded-full animate-spin" />
           ) : isAuthenticated && user ? (
