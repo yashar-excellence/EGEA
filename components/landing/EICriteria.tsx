@@ -145,17 +145,17 @@ export function EICriteria() {
                 {/* Hover Tooltip Panel */}
                 {hoveredEI === criteria.id && (
                   <div className="absolute z-50 bottom-full right-0 mb-3 w-80 pointer-events-none">
-                    <div data-tooltip-panel className="bg-slate-900 border border-gold-500/40 rounded-2xl p-5 shadow-2xl shadow-black/60">
+                    <div data-tooltip-panel className="rounded-2xl p-5 shadow-2xl border border-gold-500/40" style={{ background: '#0f172a', boxShadow: '0 25px 50px rgba(0,0,0,0.7)' }}>
                       <div className="flex items-center gap-3 mb-3">
                         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${criteria.color} flex items-center justify-center`}>
                           <criteria.icon className="w-5 h-5 text-gold-400" />
                         </div>
                         <div>
-                          <div className="text-white font-bold">{criteria.nameAr}</div>
-                          <div className="text-gold-400/70 text-xs">{criteria.name} · وزن {criteria.weight}%</div>
+                          <div className="font-bold" style={{ color: '#fff' }}>{criteria.nameAr}</div>
+                          <div className="text-xs" style={{ color: 'rgba(232,184,78,0.7)' }}>{criteria.name} · وزن {criteria.weight}%</div>
                         </div>
                       </div>
-                      <p className="text-white/70 text-sm leading-relaxed mb-3">{criteria.details}</p>
+                      <p className="text-sm leading-relaxed mb-3" style={{ color: 'rgba(255,255,255,0.7)' }}>{criteria.details}</p>
                       <div className="flex flex-wrap gap-1.5 mb-2">
                         {criteria.tools.map(t => (
                           <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-gold-500/20 text-gold-400 border border-gold-500/30">{t}</span>
@@ -176,7 +176,7 @@ export function EICriteria() {
                         <span className="text-gold-400 text-xs font-bold">{criteria.weight}%</span>
                       </div>
                     </div>
-                    <div className="w-3 h-3 bg-slate-900 border-r border-b border-gold-500/40 rotate-45 absolute -bottom-1.5 right-8" />
+                    <div className="w-3 h-3 border-r border-b border-gold-500/40 rotate-45 absolute -bottom-1.5 right-8" style={{ background: '#0f172a' }} />
                   </div>
                 )}
               </div>
@@ -213,15 +213,15 @@ export function EICriteria() {
                 {/* Hover Tooltip */}
                 {hoveredComp === comp.id && (
                   <div className="absolute z-50 bottom-full right-0 mb-3 w-72 pointer-events-none">
-                    <div data-tooltip-panel className="bg-slate-900 border border-gold-500/30 rounded-2xl p-4 shadow-2xl shadow-black/60">
+                    <div data-tooltip-panel className="rounded-2xl p-4 shadow-2xl border border-gold-500/30" style={{ background: '#0f172a', boxShadow: '0 25px 50px rgba(0,0,0,0.7)' }}>
                       <div className="flex items-center gap-2 mb-2">
                         <span className="w-8 h-8 rounded-lg bg-gold-500/20 text-gold-400 flex items-center justify-center text-xs font-bold">{comp.id}</span>
                         <div>
-                          <div className="text-white font-bold text-sm">{comp.name}</div>
-                          <div className="text-gold-400/60 text-xs">{comp.desc}</div>
+                          <div className="font-bold text-sm" style={{ color: '#fff' }}>{comp.name}</div>
+                          <div className="text-xs" style={{ color: 'rgba(232,184,78,0.6)' }}>{comp.desc}</div>
                         </div>
                       </div>
-                      <p className="text-white/70 text-xs leading-relaxed mb-3">{comp.detail}</p>
+                      <p className="text-xs leading-relaxed mb-3" style={{ color: 'rgba(255,255,255,0.7)' }}>{comp.detail}</p>
                       <div className="flex flex-wrap gap-1.5 mb-2">
                         {comp.tools.map(t => (
                           <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-gold-500/20 text-gold-400 border border-gold-500/30">{t}</span>
@@ -236,7 +236,7 @@ export function EICriteria() {
                         <span className="text-gold-400 text-xs">{comp.weight}%</span>
                       </div>
                     </div>
-                    <div className="w-3 h-3 bg-slate-900 border-r border-b border-gold-500/30 rotate-45 absolute -bottom-1.5 right-8" />
+                    <div className="w-3 h-3 border-r border-b border-gold-500/30 rotate-45 absolute -bottom-1.5 right-8" style={{ background: '#0f172a' }} />
                   </div>
                 )}
               </div>

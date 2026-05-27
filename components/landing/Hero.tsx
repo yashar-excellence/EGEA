@@ -2,7 +2,20 @@
 
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { Award, ArrowLeft, Sparkles, TrendingUp, Users, Target, Building2, Crown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, TrendingUp, Users, Target, Building2, Crown } from 'lucide-react';
+
+function useIsLight() {
+  const [isLight, setIsLight] = useState(false);
+  useEffect(() => {
+    const check = () => setIsLight(document.documentElement.classList.contains('light-mode'));
+    check();
+    const obs = new MutationObserver(check);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
+  }, []);
+  return isLight;
+}
 
 const EIRadarChart = dynamic(
   () => import('./EIRadarChart').then((mod) => mod.EIRadarChart),
@@ -104,8 +117,11 @@ export function Hero() {
               {/* Glow Effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-gold-500/30 to-emerald-500/30 blur-3xl rounded-full" />
               
-              {/* Chart Container */}
-              <div className="relative glass-crystal rounded-3xl p-8 backdrop-blur-xl border border-white/10">
+              {/* Chart Container — always dark */}
+              <div
+                className="relative rounded-3xl p-8 border"
+                style={{ background: '#0f172a', borderColor: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(16px)' }}
+              >
                 <div className="absolute -top-4 -right-4 px-4 py-2 bg-gradient-to-r from-gold-500 to-amber-500 rounded-full text-slate-950 text-sm font-bold shadow-lg">
                   EI Score
                 </div>
@@ -113,11 +129,11 @@ export function Hero() {
                 <EIRadarChart />
                 
                 <div className="mt-6 text-center">
-                  <div className="text-sm text-white/50 mb-1">Excellence Index</div>
+                  <div className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Excellence Index</div>
                   <div className="text-4xl font-bold bg-gradient-to-r from-gold-400 to-amber-300 bg-clip-text text-transparent">
                     86.0
                   </div>
-                  <div className="text-emerald-400 text-sm mt-1">مستوى: استثنائي</div>
+                  <div className="text-sm mt-1" style={{ color: '#34d399' }}>مستوى: استثنائي</div>
                 </div>
               </div>
             </div>
