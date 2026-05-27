@@ -117,23 +117,36 @@ export function Hero() {
               {/* Glow Effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-gold-500/30 to-emerald-500/30 blur-3xl rounded-full" />
               
-              {/* Chart Container — always dark */}
+              {/* Chart Container — always dark, premium look */}
               <div
-                className="relative rounded-3xl p-8 border"
-                style={{ background: '#0f172a', borderColor: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(16px)' }}
+                className="relative rounded-3xl p-8"
+                style={{
+                  background: 'linear-gradient(145deg, #1a2540 0%, #0f172a 60%, #111827 100%)',
+                  border: '1.5px solid rgba(212,160,23,0.45)',
+                  boxShadow: '0 0 0 1px rgba(212,160,23,0.1), 0 20px 60px rgba(0,0,0,0.45), 0 0 40px rgba(212,160,23,0.08)',
+                  backdropFilter: 'blur(20px)',
+                }}
               >
-                <div className="absolute -top-4 -right-4 px-4 py-2 bg-gradient-to-r from-gold-500 to-amber-500 rounded-full text-slate-950 text-sm font-bold shadow-lg">
+                {/* EI Score badge */}
+                <div
+                  className="absolute -top-4 -right-4 px-4 py-2 rounded-full text-sm font-bold shadow-lg"
+                  style={{ background: 'linear-gradient(135deg,#d4a017,#f59e0b)', color: '#0f172a' }}
+                >
                   EI Score
                 </div>
-                
+
+                {/* Subtle inner glow */}
+                <div className="absolute inset-0 rounded-3xl pointer-events-none"
+                  style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(212,160,23,0.08) 0%, transparent 70%)' }} />
+
                 <EIRadarChart />
-                
+
                 <div className="mt-6 text-center">
-                  <div className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Excellence Index</div>
-                  <div className="text-4xl font-bold bg-gradient-to-r from-gold-400 to-amber-300 bg-clip-text text-transparent">
+                  <div className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.45)', letterSpacing: '0.05em' }}>Excellence Index</div>
+                  <div className="text-5xl font-bold" style={{ background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     86.0
                   </div>
-                  <div className="text-sm mt-1" style={{ color: '#34d399' }}>مستوى: استثنائي</div>
+                  <div className="text-sm mt-2 font-semibold" style={{ color: '#34d399' }}>مستوى: استثنائي</div>
                 </div>
               </div>
             </div>
