@@ -11,6 +11,11 @@ export default withAuth(
       return NextResponse.redirect(new URL('/403', req.url));
     }
 
+    // Dashboard: admin + chief_assessor + assessor
+    if (path.startsWith('/dashboard') && !['admin', 'chief_assessor', 'assessor'].includes(token?.role as string)) {
+      return NextResponse.redirect(new URL('/403', req.url));
+    }
+
     return NextResponse.next();
   },
   {

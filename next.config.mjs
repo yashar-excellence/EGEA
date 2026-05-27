@@ -3,9 +3,12 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  swcMinify: true,
   images: {
     unoptimized: true,
+    domains: ['vfgznilocwucqimdhtxm.supabase.co'],
+  },
+  experimental: {
+    serverComponentsExternalPackages: ['@supabase/supabase-js'],
   },
 };
 
