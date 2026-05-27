@@ -27,6 +27,7 @@ interface Props {
 }
 
 const weights = { epr: 5, apt: 5, b5: 5, sjt: 10, cbi: 15, s360: 10, ojt: 10, fep: 15, fv: 25 };
+const p1Max = { epr: 5, apt: 5, b5: 5, sjt: 10, cbi: 15 };
 
 function ScoreBar({ label, score, max, weight, color }: { label: string; score: number | null; max: number; weight: number; color: string }) {
   const pct = score != null ? (score / max) * 100 : 0;
@@ -55,15 +56,13 @@ export function CandidateDetail({ candidate, ojt, fep, fv }: Props) {
   const s360 = candidate.assessment_360?.[0];
 
   const calcEI = () => {
-    const scores = {
-      epr: p1?.epr ?? 0, apt: p1?.apt ?? 0, b5: p1?.b5 ?? 0,
-      sjt: p1?.sjt ?? 0, cbi: p1?.cbi ?? 0,
-      s360: s360?.score ?? 0,
-      ojt: ojt?.total_score ?? 0,
-      fep: fep?.total_score ?? 0,
-      fv: fv?.total_score ?? 0,
-    };
-    return Object.entries(weights).reduce((acc, [k, w]) => acc + (scores[k as keyof typeof scores] / 100) * w, 0);
+    const p1Score = p1?.total != null ? (p1.total / 40) * 40 : null;
+    const s360Score = s360?.score != null ? (s360.score / 100) * 10 : null;
+    const ojtScore = ojt?.total_score != null ? (ojt.total_score / 100) * 10 : null;
+    const fepScore = fep?.total_score != null ? (fep.total_score / 100) * 15 : null;
+    const fvScore = fv?.total_score != null ? (fv.total_score / 100) * 25 : null;
+    if (p1Score === null && s360Score === null) return null;
+    return (p1Score ?? 0) + (s360Score ?? 0) + (ojtScore ?? 0) + (fepScore ?? 0) + (fvScore ?? 0);
   };
 
   const ei = calcEI();
@@ -75,7 +74,7 @@ export function CandidateDetail({ candidate, ojt, fep, fv }: Props) {
       <div className="max-w-6xl mx-auto px-4 pt-24 pb-12">
 
         {/* Back */}
-        <Link href="/dashboard" className="flex items-center gap-2 text-white/50 hover:text-white mb-6 transition w-fit">
+        <Link href="/admin" className="flex items-center gap-2 text-white/50 hover:text-white mb-6 transition w-fit">
           <ArrowRight className="w-4 h-4" />
           <span className="text-sm">العودة للوحة التحكم</span>
         </Link>
@@ -97,8 +96,8 @@ export function CandidateDetail({ candidate, ojt, fep, fv }: Props) {
               </div>
             </div>
             <div className="text-center">
-              <div className={`text-5xl font-bold ${ei >= 85 ? 'text-emerald-400' : ei >= 70 ? 'text-gold-400' : hasAnyData ? 'text-red-400' : 'text-white/20'}`}>
-                {hasAnyData ? ei.toFixed(1) : '—'}
+              <div className={`text-5xl font-bold ${ei === null ? 'text-white/20' : ei >= 85 ? 'text-emerald-400' : ei >= 70 ? 'text-gold-400' : 'text-red-400'}`}>
+                {ei !== null ? ei.toFixed(1) : '—'}
               </div>
               <div className="text-white/40 text-sm mt-1">Excellence Index</div>
               <span className={`mt-2 inline-block px-3 py-1 rounded-full text-xs font-bold ${candidate.phase === 2 ? 'bg-gold-500/20 text-gold-400' : 'bg-white/10 text-white/50'}`}>
@@ -155,7 +154,7 @@ export function CandidateDetail({ candidate, ojt, fep, fv }: Props) {
               <StatusBadge status={ojt?.status ?? null} />
             </div>
             <ScoreBar label="نتيجة OJT" score={ojt?.total_score ?? null} max={100} weight={10} color="text-emerald-400" />
-            <Link href={`/ojt?candidate=${candidate.id}`} className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition text-sm font-medium">
+            <Link href={`/ojt?candidateId=${candidate.id}`} className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition text-sm font-medium">
               <ClipboardCheck className="w-4 h-4" />
               {ojt ? 'عرض التقييم' : 'بدء التقييم'}
             </Link>
@@ -171,7 +170,7 @@ export function CandidateDetail({ candidate, ojt, fep, fv }: Props) {
               <StatusBadge status={fep?.status ?? null} />
             </div>
             <ScoreBar label="نتيجة FEP" score={fep?.total_score ?? null} max={100} weight={15} color="text-blue-400" />
-            <Link href={`/fep?candidate=${candidate.id}`} className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 transition text-sm font-medium">
+            <Link href={`/fep?candidateId=${candidate.id}`} className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 transition text-sm font-medium">
               <Presentation className="w-4 h-4" />
               {fep ? 'عرض التقييم' : 'بدء التقييم'}
             </Link>
@@ -187,7 +186,7 @@ export function CandidateDetail({ candidate, ojt, fep, fv }: Props) {
               <StatusBadge status={fv?.status ?? null} />
             </div>
             <ScoreBar label="نتيجة الزيارة الميدانية" score={fv?.total_score ?? null} max={100} weight={25} color="text-rose-400" />
-            <Link href={`/fv?candidate=${candidate.id}`} className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition text-sm font-medium">
+            <Link href={`/fv?candidateId=${candidate.id}`} className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition text-sm font-medium">
               <MapPin className="w-4 h-4" />
               {fv ? 'عرض التقييم' : 'بدء الزيارة الميدانية'}
             </Link>

@@ -12,7 +12,7 @@ export default function NewCandidatePage() {
   const [error, setError] = useState('');
   const [form, setForm] = useState({
     code: '', name: '', role: '', organization: '',
-    category: 'individual', level: 'director', cycle: '2025',
+    category: 'تميز فردي', level: 'مدير', cycle: 'الدورة الثانية', phase: '1',
   });
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
@@ -54,7 +54,7 @@ export default function NewCandidatePage() {
     <div className="min-h-screen bg-slate-950">
       <Header />
       <div className="max-w-2xl mx-auto px-4 pt-24 pb-12">
-        <Link href="/dashboard" className="flex items-center gap-2 text-white/50 hover:text-white mb-6 transition w-fit">
+        <Link href="/admin" className="flex items-center gap-2 text-white/50 hover:text-white mb-6 transition w-fit">
           <ArrowRight className="w-4 h-4" /><span className="text-sm">العودة</span>
         </Link>
 
@@ -77,25 +77,26 @@ export default function NewCandidatePage() {
                 <label className="block text-white/70 text-sm mb-2">الفئة</label>
                 <select value={form.category} onChange={e => set('category', e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-gold-400">
-                  <option value="individual">فردي</option>
-                  <option value="team">فريق</option>
+                  <option value="تميز فردي">فردي</option>
+                  <option value="تميز جماعي">جماعي</option>
                 </select>
               </div>
               <div>
                 <label className="block text-white/70 text-sm mb-2">المستوى</label>
                 <select value={form.level} onChange={e => set('level', e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-gold-400">
-                  <option value="director">مدير</option>
-                  <option value="manager">مدير عام</option>
-                  <option value="specialist">متخصص</option>
+                  <option value="مدير">مدير</option>
+                  <option value="مدير عام">مدير عام</option>
+                  <option value="رئيس قسم">رئيس قسم</option>
+                  <option value="مسؤول أول">مسؤول أول</option>
                 </select>
               </div>
               <div>
                 <label className="block text-white/70 text-sm mb-2">الدورة</label>
                 <select value={form.cycle} onChange={e => set('cycle', e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-gold-400">
-                  <option value="2025">2025</option>
-                  <option value="2026">2026</option>
+                  <option value="الدورة الثانية">الدورة الثانية</option>
+                  <option value="الدورة الثالثة">الدورة الثالثة</option>
                 </select>
               </div>
             </div>

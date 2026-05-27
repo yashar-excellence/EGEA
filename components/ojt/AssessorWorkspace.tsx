@@ -52,6 +52,7 @@ export function AssessorWorkspace({ candidateId }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           candidate_id: candidateId,
+          assessor_id: 'a0000000-0000-0000-0000-000000000001',
           data: submission,
           total_score: result.percentage,
           status,

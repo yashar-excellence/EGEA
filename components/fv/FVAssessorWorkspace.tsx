@@ -68,7 +68,7 @@ export function FVAssessorWorkspace({ candidateId }: Props) {
       await fetch('/api/submissions/fv', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ candidate_id: candidateId, data: submission, total_score: result.percentage, status }),
+        body: JSON.stringify({ candidate_id: candidateId, assessor_id: 'a0000000-0000-0000-0000-000000000001', data: submission, total_score: result.percentage, status }),
       });
       setSaveMsg(status === 'submitted' ? '✅ تم رفع التقييم' : '✅ تم الحفظ');
     } catch { setSaveMsg('❌ خطأ في الحفظ'); }
