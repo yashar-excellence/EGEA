@@ -1,32 +1,14 @@
-import { createClient } from '@/lib/supabase/server';
-import { DashboardClient } from '@/components/dashboard/DashboardClient';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Dashboard · لوحة التحكم',
-};
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/options';
+import { redirect } from 'next/navigation';
 
 export default async function DashboardPage() {
-  const supabase = createClient();
+  const session = await getServerSession(authOptions);
+  const role = (session?.user as any)?.role;
 
-  const [candidatesRes, ojtRes, fepRes, fvRes] = await Promise.all([
-    supabase.from('candidates').select('*, phase1_scores(*), assessment_360(*)').order('created_at', { ascending: false }),
-    supabase.from('ojt_submissions').select('candidate_id, total_score, status'),
-    supabase.from('fep_submissions').select('candidate_id, total_score, status'),
-    supabase.from('fv_submissions').select('candidate_id, total_score, status'),
-  ]);
+  if (role === 'admin') redirect('/admin');
+  if (role === 'chief_assessor') redirect('/dashboard/chief');
+  if (role === 'assessor') redirect('/dashboard/assessor');
 
-  const candidates = candidatesRes.data ?? [];
-  const ojt = ojtRes.data ?? [];
-  const fep = fepRes.data ?? [];
-  const fv = fvRes.data ?? [];
-
-  return (
-    <DashboardClient
-      candidates={candidates}
-      ojtSubmissions={ojt}
-      fepSubmissions={fep}
-      fvSubmissions={fv}
-    />
-  );
+  redirect('/login');
 }

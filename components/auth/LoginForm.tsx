@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { LogIn, Loader2 } from 'lucide-react';
 import { LogoSmall } from '@/components/Logo';
@@ -27,7 +27,12 @@ export function LoginForm() {
       setError('البريد أو كلمة المرور غير صحيحة');
       setLoading(false);
     } else {
-      router.push('/dashboard');
+      const session = await getSession();
+      const role = (session?.user as any)?.role;
+      if (role === 'admin') router.push('/admin');
+      else if (role === 'chief_assessor') router.push('/dashboard/chief');
+      else if (role === 'assessor') router.push('/dashboard/assessor');
+      else router.push('/dashboard');
       router.refresh();
     }
   };
