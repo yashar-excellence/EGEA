@@ -6,10 +6,17 @@ import { useSession, signOut } from 'next-auth/react';
 import { Menu, User, LogOut, Settings, ChevronDown, Sun, Moon } from 'lucide-react';
 import { LogoLink } from '@/components/Logo';
 
+const navLinks = [
+  { label: 'الرئيسية', href: '#hero' },
+  { label: 'أدوات التقييم', href: '#tools' },
+  { label: 'معايير التميز', href: '#ei-criteria' },
+];
+
 export function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lightMode, setLightMode] = useState(false);
+  const [activeSection, setActiveSection] = useState('hero');
   const { data: session, status } = useSession();
 
   const isAuthenticated = status === 'authenticated';
@@ -24,6 +31,29 @@ export function Header() {
       document.body.style.color = '#1C150A';
     }
   }, []);
+
+  useEffect(() => {
+    const ids = ['hero', 'tools', 'ei-criteria'];
+    const observers: IntersectionObserver[] = [];
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) setActiveSection(id); },
+        { threshold: 0.3 }
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+    return () => observers.forEach((o) => o.disconnect());
+  }, []);
+
+  const scrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const id = href.replace('#', '');
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const applyTheme = (isLight: boolean) => {
     if (isLight) {
@@ -56,6 +86,33 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 glass-strong border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 h-24 flex items-center justify-between">
         <LogoLink />
+
+        {/* Nav Links — center */}
+        <nav className="hidden md:flex items-center gap-1">
+          {navLinks.map((link) => {
+            const id = link.href.replace('#', '');
+            const isActive = activeSection === id;
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={(e) => scrollTo(e, link.href)}
+                className="relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                style={{
+                  color: isActive ? '#d4a017' : lightMode ? 'rgba(28,21,10,0.65)' : 'rgba(255,255,255,0.65)',
+                }}
+              >
+                {link.label}
+                {isActive && (
+                  <span
+                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full"
+                    style={{ background: 'linear-gradient(90deg,#d4a017,#f59e0b)' }}
+                  />
+                )}
+              </a>
+            );
+          })}
+        </nav>
 
         <div className="flex items-center gap-3">
           {/* Theme Toggle */}
