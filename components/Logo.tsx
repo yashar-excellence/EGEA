@@ -24,7 +24,7 @@ export function LogoLink() {
       <img
         src={isLight ? LOGO_LIGHT : LOGO_DARK}
         alt="جائزة مصر للتميز الحكومي"
-        className="h-12 w-auto object-contain"
+        className="h-16 w-auto object-contain"
       />
     </Link>
   );
@@ -37,7 +37,7 @@ export function LogoSmall() {
     <img
       src={isLight ? LOGO_LIGHT : LOGO_DARK}
       alt="EGEA"
-      className="h-8 w-auto object-contain"
+      className="h-14 w-auto object-contain"
     />
   );
 }

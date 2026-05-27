@@ -145,7 +145,7 @@ export function EICriteria() {
                 {/* Hover Tooltip Panel */}
                 {hoveredEI === criteria.id && (
                   <div className="absolute z-50 bottom-full right-0 mb-3 w-80 pointer-events-none">
-                    <div className="bg-slate-900 border border-gold-500/40 rounded-2xl p-5 shadow-2xl shadow-black/60">
+                    <div data-tooltip-panel className="bg-slate-900 border border-gold-500/40 rounded-2xl p-5 shadow-2xl shadow-black/60">
                       <div className="flex items-center gap-3 mb-3">
                         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${criteria.color} flex items-center justify-center`}>
                           <criteria.icon className="w-5 h-5 text-gold-400" />
@@ -213,7 +213,7 @@ export function EICriteria() {
                 {/* Hover Tooltip */}
                 {hoveredComp === comp.id && (
                   <div className="absolute z-50 bottom-full right-0 mb-3 w-72 pointer-events-none">
-                    <div className="bg-slate-900 border border-gold-500/30 rounded-2xl p-4 shadow-2xl shadow-black/60">
+                    <div data-tooltip-panel className="bg-slate-900 border border-gold-500/30 rounded-2xl p-4 shadow-2xl shadow-black/60">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="w-8 h-8 rounded-lg bg-gold-500/20 text-gold-400 flex items-center justify-center text-xs font-bold">{comp.id}</span>
                         <div>

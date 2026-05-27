@@ -54,6 +54,25 @@
 /* absolute bg divs inside sections */
 .light-mode .absolute.inset-0 { background: transparent !important; }
 
+/* Hero Radar chart card - keep it readable in light */
+.light-mode .glass-crystal .text-white\/50 { color: rgba(28,21,10,0.5) !important; }
+.light-mode .text-emerald-400 { color: #059669 !important; }
+
+/* Stat cards in light mode */
+.light-mode .glass-strong { color: #1C150A; }
+
+/* ===== TOOLTIPS always dark regardless of mode ===== */
+[data-tooltip-panel] {
+  background: #0f172a !important;
+  color: #ffffff !important;
+}
+[data-tooltip-panel] .text-white { color: #ffffff !important; }
+[data-tooltip-panel] .text-white\/70 { color: rgba(255,255,255,0.7) !important; }
+[data-tooltip-panel] .text-gold-400 { color: #e8b84e !important; }
+[data-tooltip-panel] .text-gold-400\/70 { color: rgba(232,184,78,0.7) !important; }
+[data-tooltip-panel] .text-gold-400\/60 { color: rgba(232,184,78,0.6) !important; }
+[data-tooltip-panel] .bg-white\/10 { background: rgba(255,255,255,0.1) !important; }
+
 * {
   font-family: var(--font-cairo), system-ui, sans-serif;
 }
