@@ -1,12 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
-import { AdminDashboard } from '@/components/dashboard/AdminDashboard';
+import { ChiefDashboard } from '@/components/dashboard/ChiefDashboard';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'لوحة الإدارة · جائزة مصر للتميز الحكومي',
+  title: 'لوحة رئيس المقيّمين · جائزة مصر للتميز الحكومي',
 };
 
-export default async function AdminPage() {
+export default async function ChiefPage() {
   const supabase = createClient();
   const [candidatesRes, ojtRes, fepRes, fvRes] = await Promise.all([
     supabase.from('candidates').select('*, phase1_scores(*), assessment_360(*)').order('created_at', { ascending: false }),
@@ -16,7 +16,7 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <AdminDashboard
+    <ChiefDashboard
       candidates={candidatesRes.data ?? []}
       ojtSubmissions={ojtRes.data ?? []}
       fepSubmissions={fepRes.data ?? []}

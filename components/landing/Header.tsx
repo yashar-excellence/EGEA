@@ -79,7 +79,8 @@ export function Header() {
     if (role === 'admin') return '/admin';
     if (role === 'chief_assessor') return '/dashboard/chief';
     if (role === 'assessor') return '/dashboard/assessor';
-    return '/';
+    if (role === 'viewer') return '/dashboard';
+    return '/dashboard';
   };
 
   return (
