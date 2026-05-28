@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, Save, FileText, MapPin, Users, ClipboardCheck, CheckCircle2, AlertTriangle, Calendar, User, Loader2 } from 'lucide-react';
 import { Header } from '@/components/landing/Header';
@@ -22,6 +23,7 @@ const defaultChecklist: ChecklistItem[] = [
 ];
 
 export function FVAssessorWorkspace({ candidateId }: Props) {
+  const router = useRouter();
   const [submission, setSubmission] = useState<FVSubmission>({
     candidateCode: 'C-2025-0014',
     candidateName: 'مؤمن الأحمري - سعاينة',
@@ -71,9 +73,12 @@ export function FVAssessorWorkspace({ candidateId }: Props) {
         body: JSON.stringify({ candidate_id: candidateId, assessor_id: 'a0000000-0000-0000-0000-000000000001', data: submission, total_score: result.percentage, status }),
       });
       setSaveMsg(status === 'submitted' ? '✅ تم رفع التقييم' : '✅ تم الحفظ');
+      if (status === 'submitted' && candidateId) {
+        setTimeout(() => router.push(`/dashboard/candidates/${candidateId}`), 1200);
+      }
     } catch { setSaveMsg('❌ خطأ في الحفظ'); }
-    finally { setSaving(false); setTimeout(() => setSaveMsg(''), 3000); }
-  }, [candidateId, submission]);
+    finally { setSaving(false); if (status !== 'submitted') setTimeout(() => setSaveMsg(''), 3000); }
+  }, [candidateId, submission, router]);
   const [newInterview, setNewInterview] = useState({ stakeholderName: '', role: '', keyPoints: '', satisfaction: 3 as number });
 
   const updateScore = (areaId: string, rating: number) => {
@@ -115,9 +120,10 @@ export function FVAssessorWorkspace({ candidateId }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Link href="/admin" className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
+            <Link href={candidateId ? `/dashboard/candidates/${candidateId}` : '/admin'}
+              className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
               <ArrowRight className="w-4 h-4" />
-              العودة للوحة التحكم
+              {candidateId ? 'العودة لملف المرشح' : 'العودة للوحة التحكم'}
             </Link>
             <h1 className="text-3xl font-bold text-white">FV — الزيارة الميدانية</h1>
           </div>

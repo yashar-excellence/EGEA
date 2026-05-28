@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, Save, FileText, Users, Award, TrendingUp, AlertTriangle, CheckCircle2, User, Loader2 } from 'lucide-react';
 import { Header } from '@/components/landing/Header';
@@ -12,6 +13,7 @@ import type { FEPSubmission, FEPEvaluation } from '@/lib/fep/types';
 interface Props { candidateId?: string; }
 
 export function FEPPanelWorkspace({ candidateId }: Props) {
+  const router = useRouter();
   const [submission, setSubmission] = useState<FEPSubmission>(createSampleFEPSubmission());
   const [activeEvaluatorIndex, setActiveEvaluatorIndex] = useState(0);
   const [showAggregated, setShowAggregated] = useState(false);
@@ -48,9 +50,12 @@ export function FEPPanelWorkspace({ candidateId }: Props) {
         body: JSON.stringify({ candidate_id: candidateId, data: submission, total_score: result.percentage, status }),
       });
       setSaveMsg(status === 'submitted' ? '✅ تم رفع التقييم' : '✅ تم الحفظ');
+      if (status === 'submitted' && candidateId) {
+        setTimeout(() => router.push(`/dashboard/candidates/${candidateId}`), 1200);
+      }
     } catch { setSaveMsg('❌ خطأ في الحفظ'); }
-    finally { setSaving(false); setTimeout(() => setSaveMsg(''), 3000); }
-  }, [candidateId, submission]);
+    finally { setSaving(false); if (status !== 'submitted') setTimeout(() => setSaveMsg(''), 3000); }
+  }, [candidateId, submission, router]);
 
   const result = useMemo(() => aggregateFEPScores(submission), [submission]);
   const activeEvaluation = submission.evaluations[activeEvaluatorIndex];
@@ -99,9 +104,10 @@ export function FEPPanelWorkspace({ candidateId }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Link href="/admin" className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
+            <Link href={candidateId ? `/dashboard/candidates/${candidateId}` : '/admin'}
+              className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
               <ArrowRight className="w-4 h-4" />
-              العودة للوحة التحكم
+              {candidateId ? 'العودة لملف المرشح' : 'العودة للوحة التحكم'}
             </Link>
             <h1 className="text-3xl font-bold text-white">FEP — العرض النهائي للتميز</h1>
           </div>

@@ -6,7 +6,7 @@ import {
   Users, ClipboardCheck, MapPin, Presentation, Award,
   Search, TrendingUp, Shield, Bell, Settings,
   CheckCircle2, Clock, AlertTriangle, BarChart2,
-  UserCheck, UserPlus, Activity, ChevronRight, Eye,
+  UserCheck, UserPlus, Activity, ChevronRight, Eye, Upload,
 } from 'lucide-react';
 import { Header } from '@/components/landing/Header';
 
@@ -100,6 +100,11 @@ export function AdminDashboard({ candidates, ojtSubmissions, fepSubmissions, fvS
             <p className="text-white/40 mt-1">إدارة شاملة لجائزة مصر للتميز الحكومي</p>
           </div>
           <div className="flex items-center gap-3">
+            <Link href="/admin/import"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
+              <Upload className="w-4 h-4 text-amber-400" />
+              استيراد بيانات
+            </Link>
             <Link href="/dashboard/candidates/new"
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-gold-500 to-amber-500 text-slate-950 font-bold hover:opacity-90 transition-all shadow-lg shadow-gold-500/20">
               <UserPlus className="w-4 h-4" />

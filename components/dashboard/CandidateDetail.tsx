@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {
   ArrowRight, User, Building2, Award, ClipboardCheck,
   Presentation, MapPin, TrendingUp, CheckCircle2, Clock,
-  AlertCircle, BarChart2, Star,
+  AlertCircle, BarChart2, Star, Upload,
 } from 'lucide-react';
 import { Header } from '@/components/landing/Header';
 import {
@@ -186,10 +186,17 @@ export function CandidateDetail({ candidate, ojt, fep, fv }: Props) {
       <Header />
       <div className="max-w-6xl mx-auto px-4 pt-24 pb-16">
 
-        <Link href="/admin" className="flex items-center gap-2 text-white/50 hover:text-white mb-6 transition w-fit">
-          <ArrowRight className="w-4 h-4" />
-          <span className="text-sm">العودة للوحة التحكم</span>
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/admin" className="flex items-center gap-2 text-white/50 hover:text-white transition">
+            <ArrowRight className="w-4 h-4" />
+            <span className="text-sm">العودة للوحة التحكم</span>
+          </Link>
+          <Link href={`/dashboard/candidates/${candidate.id}/scores`}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition text-sm">
+            <Upload className="w-4 h-4 text-amber-400" />
+            إدخال بيانات Outsource
+          </Link>
+        </div>
 
         {/* ── Hero Card ── */}
         <div className="glass-crystal rounded-2xl p-6 mb-6 border border-white/10">

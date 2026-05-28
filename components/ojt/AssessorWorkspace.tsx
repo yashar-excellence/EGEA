@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, Save, FileText, Download, AlertTriangle, CheckCircle2, User, Building2, Award, Loader2 } from 'lucide-react';
 import { Header } from '@/components/landing/Header';
@@ -12,6 +13,7 @@ import type { OJTSubmission, Achievement } from '@/lib/ojt/types';
 interface Props { candidateId?: string; }
 
 export function AssessorWorkspace({ candidateId }: Props) {
+  const router = useRouter();
   const [submission, setSubmission] = useState<OJTSubmission>(createSampleOJTSubmission());
   const [activeAchievementIndex, setActiveAchievementIndex] = useState(0);
   const [activeAxisId, setActiveAxisId] = useState<string | null>(null);
@@ -59,13 +61,16 @@ export function AssessorWorkspace({ candidateId }: Props) {
         }),
       });
       setSaveMsg(status === 'submitted' ? '✅ تم رفع التقييم' : '✅ تم الحفظ');
+      if (status === 'submitted' && candidateId) {
+        setTimeout(() => router.push(`/dashboard/candidates/${candidateId}`), 1200);
+      }
     } catch {
       setSaveMsg('❌ خطأ في الحفظ');
     } finally {
       setSaving(false);
-      setTimeout(() => setSaveMsg(''), 3000);
+      if (status !== 'submitted') setTimeout(() => setSaveMsg(''), 3000);
     }
-  }, [candidateId, submission]);
+  }, [candidateId, submission, router]);
 
   const result = useMemo(() => computeOJT(submission), [submission]);
   const activeAchievement = submission.achievements[activeAchievementIndex];
@@ -108,9 +113,10 @@ export function AssessorWorkspace({ candidateId }: Props) {
       <div className="max-w-7xl mx-auto px-4 pt-24 pb-12">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Link href="/admin" className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
+            <Link href={candidateId ? `/dashboard/candidates/${candidateId}` : '/admin'}
+              className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
               <ArrowRight className="w-4 h-4" />
-              العودة للوحة التحكم
+              {candidateId ? 'العودة لملف المرشح' : 'العودة للوحة التحكم'}
             </Link>
             <h1 className="text-3xl font-bold text-white">أداة OJT — تقييم الأداء الفعلي الافتراضي</h1>
           </div>
