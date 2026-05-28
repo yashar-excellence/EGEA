@@ -55,43 +55,120 @@ function StatusBadge({ status }: { status: string | null }) {
 }
 
 function EIGauge({ value, max = 100 }: { value: number | null; max?: number }) {
-  const pct = value != null ? Math.min(value / max, 1) : 0;
-  const r = 60;
-  const cx = 90;
-  const cy = 80;
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
-  // Arc goes from 180° (left) to 0° (right) counter-clockwise on top
-  const sweepAngle = pct * 180;
-  const startDeg = 180;
-  const endDeg = 180 - sweepAngle;
-  const x1 = cx + r * Math.cos(toRad(startDeg));
-  const y1 = cy + r * Math.sin(toRad(startDeg));
-  const x2 = cx + r * Math.cos(toRad(endDeg));
-  const y2 = cy + r * Math.sin(toRad(endDeg));
-  const largeArc = sweepAngle > 180 ? 1 : 0;
-  const color = value === null ? '#334155' : value >= 85 ? '#34d399' : value >= 70 ? '#f59e0b' : '#f87171';
+  const W = 220;
+  const H = 130;
+  const cx = W / 2;
+  const cy = H - 20;
+  const R = 80;
+  const strokeW = 14;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+
+  // Track: from 210° to 330° going clockwise (spans 300° — 150° each side of bottom)
+  // Simpler: semicircle from 180° to 0° (left to right) on top half
+  // We use: start = 210°, end = 330° (sweeps 300° through the top)
+  const startDeg = 215;
+  const totalSweep = 290;
+  const pct = value != null ? Math.min(Math.max(value / max, 0), 1) : 0;
+  const valueSweep = pct * totalSweep;
+
+  const arcPath = (from: number, sweep: number, r: number) => {
+    const s = toRad(from);
+    const e = toRad(from - sweep);
+    const x1 = cx + r * Math.cos(s);
+    const y1 = cy + r * Math.sin(s);
+    const x2 = cx + r * Math.cos(e);
+    const y2 = cy + r * Math.sin(e);
+    const large = sweep > 180 ? 1 : 0;
+    return `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${large} 0 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
+  };
+
+  const color = value === null ? '#334155'
+    : value >= 85 ? '#34d399'
+    : value >= 70 ? '#f59e0b'
+    : value >= 55 ? '#60a5fa'
+    : '#f87171';
+
+  const glowColor = value === null ? 'none'
+    : value >= 85 ? '#34d39944'
+    : value >= 70 ? '#f59e0b44'
+    : value >= 55 ? '#60a5fa44'
+    : '#f8717144';
+
+  const label = value === null ? null
+    : value >= 85 ? 'ممتاز'
+    : value >= 70 ? 'جيد جداً'
+    : value >= 55 ? 'جيد'
+    : 'يحتاج تطوير';
+
+  // Needle tip position
+  const needleDeg = startDeg - valueSweep;
+  const needleR = R - strokeW / 2 - 2;
+  const nx = cx + needleR * Math.cos(toRad(needleDeg));
+  const ny = cy + needleR * Math.sin(toRad(needleDeg));
 
   return (
-    <svg width="180" height="100" viewBox="0 0 180 100">
-      {/* Track */}
-      <path
-        d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
-        fill="none" stroke="#1e293b" strokeWidth="12" strokeLinecap="round"
-      />
-      {/* Value arc */}
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+
+      {/* Track background */}
+      <path d={arcPath(startDeg, totalSweep, R)}
+        fill="none" stroke="#1e293b" strokeWidth={strokeW + 2} strokeLinecap="round" />
+
+      {/* Colored fill arc */}
       {pct > 0 && (
-        <path
-          d={`M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 0 ${x2} ${y2}`}
-          fill="none" stroke={color} strokeWidth="12" strokeLinecap="round"
-        />
+        <path d={arcPath(startDeg, valueSweep, R)}
+          fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round"
+          filter="url(#glow)" />
       )}
-      {/* Value text */}
-      <text x={cx} y={cy - 6} textAnchor="middle" fill={color} fontSize="24" fontWeight="bold" fontFamily="Cairo, sans-serif">
+
+      {/* Needle dot */}
+      {pct > 0 && (
+        <circle cx={nx.toFixed(2)} cy={ny.toFixed(2)} r="5"
+          fill={color} filter="url(#glow)" />
+      )}
+
+      {/* Center dot */}
+      <circle cx={cx} cy={cy} r="4" fill="#334155" />
+
+      {/* Value */}
+      <text x={cx} y={cy - 28} textAnchor="middle"
+        fill={color} fontSize="30" fontWeight="bold" fontFamily="Cairo, sans-serif">
         {value !== null ? value.toFixed(1) : '—'}
       </text>
-      <text x={cx} y={cy + 10} textAnchor="middle" fill="#64748b" fontSize="9" fontFamily="Cairo, sans-serif">Excellence Index / 100</text>
-      <text x={cx - r + 4} y={cy + 20} fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">0</text>
-      <text x={cx + r - 12} y={cy + 20} fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">100</text>
+
+      {/* Label */}
+      {label && (
+        <text x={cx} y={cy - 8} textAnchor="middle"
+          fill={color} fontSize="11" fontFamily="Cairo, sans-serif" opacity="0.85">
+          {label}
+        </text>
+      )}
+
+      {/* Sub label */}
+      <text x={cx} y={cy + 10} textAnchor="middle"
+        fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">
+        Excellence Index
+      </text>
+
+      {/* 0 and 100 labels */}
+      {(() => {
+        const s0 = toRad(startDeg);
+        const s100 = toRad(startDeg - totalSweep);
+        const lr = R + 14;
+        return (
+          <>
+            <text x={(cx + lr * Math.cos(s0)).toFixed(1)} y={(cy + lr * Math.sin(s0)).toFixed(1)}
+              textAnchor="middle" fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">0</text>
+            <text x={(cx + lr * Math.cos(s100)).toFixed(1)} y={(cy + lr * Math.sin(s100)).toFixed(1)}
+              textAnchor="middle" fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">100</text>
+          </>
+        );
+      })()}
     </svg>
   );
 }
