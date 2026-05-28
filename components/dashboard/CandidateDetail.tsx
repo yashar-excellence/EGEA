@@ -127,7 +127,7 @@ export function CandidateDetail({ candidate, ojt, fep, fv }: Props) {
   return (
     <div className="min-h-screen bg-slate-950">
       <Header />
-      <div className="max-w-6xl mx-auto px-4 pt-24 pb-16">
+      <div className="max-w-6xl mx-auto px-4 pt-20 pb-16">
 
         <Link href="/admin" className="flex items-center gap-2 text-white/50 hover:text-white mb-6 transition w-fit">
           <ArrowRight className="w-4 h-4" />

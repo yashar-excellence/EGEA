@@ -200,14 +200,14 @@ export function AdminDashboard({ candidates, ojtSubmissions, fepSubmissions, fvS
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-white/10">
-                    {['المرشح', 'الجهة', 'المرحلة', 'Phase 1', 'OJT', 'FEP', 'FV', 'EI Score', ''].map(h => (
+                    {['المرشح', 'الجهة', 'المرحلة', 'Phase 1 /40', '360° /100', 'OJT', 'FEP', 'FV', 'EI Score', ''].map(h => (
                       <th key={h} className="text-right text-white/40 text-xs font-medium px-5 py-3">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.length === 0 ? (
-                    <tr><td colSpan={9} className="text-center text-white/20 py-16 text-sm">لا يوجد مرشحون</td></tr>
+                    <tr><td colSpan={10} className="text-center text-white/20 py-16 text-sm">لا يوجد مرشحون</td></tr>
                   ) : filtered.map((c) => {
                     const ei = calcEI(c);
                     const p1 = c.phase1_scores?.[0]?.total;
@@ -232,7 +232,12 @@ export function AdminDashboard({ candidates, ojtSubmissions, fepSubmissions, fvS
                           }`}>مرحلة {c.phase}</span>
                         </td>
                         <td className="px-5 py-3.5 text-center">
-                          {p1 != null ? <span className="text-emerald-400 font-bold text-sm">{p1.toFixed(1)}</span> : <span className="text-white/20 text-xs">—</span>}
+                          {p1 != null ? <span className="text-amber-400 font-bold text-sm">{p1.toFixed(1)}</span> : <span className="text-white/20 text-xs">—</span>}
+                        </td>
+                        <td className="px-5 py-3.5 text-center">
+                          {c.assessment_360?.[0]?.score != null
+                            ? <span className="text-purple-400 font-bold text-sm">{c.assessment_360[0].score.toFixed(1)}</span>
+                            : <span className="text-white/20 text-xs">—</span>}
                         </td>
                         <td className="px-5 py-3.5 text-center"><ScoreBadge subs={ojtSubmissions} /></td>
                         <td className="px-5 py-3.5 text-center"><ScoreBadge subs={fepSubmissions} /></td>
