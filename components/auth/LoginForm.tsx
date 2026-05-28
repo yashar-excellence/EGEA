@@ -33,6 +33,7 @@ export function LoginForm() {
       if (role === 'admin') router.push('/admin');
       else if (role === 'chief_assessor') router.push('/dashboard/chief');
       else if (role === 'assessor') router.push('/dashboard/assessor');
+      else if (role === 'award_admin') router.push('/dashboard/award');
       else router.push('/dashboard');
       router.refresh();
     }

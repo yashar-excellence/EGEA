@@ -9,6 +9,7 @@ import { LogoLink } from '@/components/Logo';
 const navLinks = [
   { label: 'الرئيسية', href: '#hero' },
   { label: 'أدوات التقييم', href: '#tools' },
+  { label: 'أدوار المنصة', href: '#roles' },
   { label: 'معايير التميز', href: '#ei-criteria' },
 ];
 

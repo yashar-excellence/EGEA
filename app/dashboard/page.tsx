@@ -9,6 +9,7 @@ export default async function DashboardPage() {
   if (role === 'admin') redirect('/admin');
   if (role === 'chief_assessor') redirect('/dashboard/chief');
   if (role === 'assessor') redirect('/dashboard/assessor');
+  if (role === 'award_admin') redirect('/dashboard/award');
 
   redirect('/login');
 }

@@ -11,8 +11,13 @@ export default withAuth(
       return NextResponse.redirect(new URL('/403', req.url));
     }
 
-    // Dashboard: admin + chief_assessor + assessor
-    if (path.startsWith('/dashboard') && !['admin', 'chief_assessor', 'assessor'].includes(token?.role as string)) {
+    // Dashboard: all authenticated roles
+    if (path.startsWith('/dashboard') && !['admin', 'chief_assessor', 'assessor', 'award_admin', 'viewer'].includes(token?.role as string)) {
+      return NextResponse.redirect(new URL('/403', req.url));
+    }
+
+    // Award dashboard: award_admin only
+    if (path.startsWith('/dashboard/award') && token?.role !== 'award_admin' && token?.role !== 'admin') {
       return NextResponse.redirect(new URL('/403', req.url));
     }
 

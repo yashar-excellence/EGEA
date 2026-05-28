@@ -62,8 +62,11 @@ export function AdminDashboard({ candidates, ojtSubmissions, fepSubmissions, fvS
     const fep = getScore(c.id, fepSubmissions);
     const fv = getScore(c.id, fvSubmissions);
     if (p1 === null && s360 === null) return null;
-    return [p1 ?? 0, s360 ?? 0, ojt ?? 0, fep ?? 0, fv ?? 0]
-      .reduce((acc, s, i) => acc + s * [0.40, 0.10, 0.10, 0.15, 0.25][i], 0);
+    return (p1 ?? 0)
+      + ((s360 ?? 0) / 100) * 10
+      + ((ojt ?? 0) / 100) * 10
+      + ((fep ?? 0) / 100) * 15
+      + ((fv ?? 0) / 100) * 25;
   };
 
   const filtered = candidates.filter(c => {
