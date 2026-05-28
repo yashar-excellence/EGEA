@@ -55,22 +55,13 @@ function StatusBadge({ status }: { status: string | null }) {
 }
 
 function EIGauge({ value, max = 100 }: { value: number | null; max?: number }) {
-  const cx = 100, cy = 95, R = 70, sw = 13;
+  // Use stroke-dasharray on a full circle, rotated so semicircle shows at top
+  // R=60, circumference=2πR≈376.99, half=188.5 (the semicircle we show)
+  const R = 60;
+  const circ = 2 * Math.PI * R;
+  const half = circ / 2; // semicircle arc length = 188.5
   const pct = value != null ? Math.min(Math.max(value / max, 0), 1) : 0;
-
-  // Full track: right (0°) → left (180°) counter-clockwise through top
-  // SVG: M right_point A R R 0 0 0 left_point   (sweep=0 = counter-clockwise)
-  const rx = cx + R, ry = cy;   // right = (170, 95)
-  const lx = cx - R, ly = cy;   // left  = (30,  95)
-
-  // Value arc end point: starts at right (0°=east), rotates counter-clockwise
-  // angle from east going counter-clockwise = pct * 180°
-  const endAngleDeg = pct * 180; // 0 = right, 90 = top, 180 = left
-  const endRad = (endAngleDeg * Math.PI) / 180;
-  const ex = cx + R * Math.cos(Math.PI - endRad); // mirror: starts right goes left
-  const ey = cy - R * Math.sin(endRad);            // negative sin = upward
-
-  const largeArc = pct > 0.5 ? 1 : 0;
+  const filled = pct * half;
 
   const color = value === null ? '#334155'
     : value >= 85 ? '#34d399'
@@ -84,56 +75,68 @@ function EIGauge({ value, max = 100 }: { value: number | null; max?: number }) {
     : value >= 55 ? 'جيد'
     : 'يحتاج تطوير';
 
+  // cx=100, cy=90 — circle center. Rotate -90deg so 0° is at left, 180° is at right
+  // strokeDasharray: [filled, gap_to_hide_bottom_half]
+  // We rotate the circle by -180deg so arc starts from left and goes clockwise to right
+
   return (
-    <svg width="200" height="110" viewBox="0 0 200 110">
+    <svg width="200" height="105" viewBox="0 0 200 105">
       <defs>
-        <filter id="ei-glow" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur stdDeviation="3.5" result="blur" />
+        <filter id="ei-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
           <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
       </defs>
 
-      {/* Grey track: right → left, counter-clockwise (sweep=0) */}
-      <path d={`M ${rx} ${ry} A ${R} ${R} 0 0 0 ${lx} ${ly}`}
-        fill="none" stroke="#1e293b" strokeWidth={sw + 4} strokeLinecap="round" />
+      {/* Track — full semicircle, grey */}
+      <circle
+        cx="100" cy="90" r={R}
+        fill="none"
+        stroke="#1e293b"
+        strokeWidth="14"
+        strokeDasharray={`${half} ${circ - half}`}
+        strokeDashoffset={0}
+        strokeLinecap="round"
+        transform="rotate(-180 100 90)"
+      />
 
-      {/* Value arc: right → end, counter-clockwise */}
-      {pct > 0 && (
-        <path d={`M ${rx} ${ry} A ${R} ${R} 0 ${largeArc} 0 ${ex.toFixed(2)} ${ey.toFixed(2)}`}
-          fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round"
-          filter="url(#ei-glow)" />
-      )}
+      {/* Value arc */}
+      <circle
+        cx="100" cy="90" r={R}
+        fill="none"
+        stroke={color}
+        strokeWidth="12"
+        strokeDasharray={`${filled} ${circ - filled}`}
+        strokeDashoffset={0}
+        strokeLinecap="round"
+        transform="rotate(-180 100 90)"
+        filter="url(#ei-glow)"
+      />
 
-      {/* Dot at arc tip */}
-      {pct > 0.02 && pct < 0.98 && (
-        <circle cx={ex.toFixed(2)} cy={ey.toFixed(2)} r="7"
-          fill={color} stroke="#0f172a" strokeWidth="2.5" filter="url(#ei-glow)" />
-      )}
-
-      {/* Value */}
-      <text x={cx} y={cy - 22} textAnchor="middle"
-        fill={color} fontSize="28" fontWeight="bold" fontFamily="Cairo, sans-serif">
+      {/* Value text */}
+      <text x="100" y="68" textAnchor="middle"
+        fill={color} fontSize="26" fontWeight="bold" fontFamily="Cairo, sans-serif">
         {value !== null ? value.toFixed(1) : '—'}
       </text>
 
       {/* Grade */}
       {grade && (
-        <text x={cx} y={cy - 4} textAnchor="middle"
+        <text x="100" y="84" textAnchor="middle"
           fill={color} fontSize="11" fontFamily="Cairo, sans-serif" opacity="0.85">
           {grade}
         </text>
       )}
 
       {/* Subtitle */}
-      <text x={cx} y={cy + 14} textAnchor="middle"
+      <text x="100" y="102" textAnchor="middle"
         fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">
         Excellence Index / 100
       </text>
 
-      {/* 0 at right, 100 at left — matching arc direction */}
-      <text x={rx + 6} y={cy + 14} textAnchor="start"
+      {/* Labels: 0 at left, 100 at right */}
+      <text x="26" y="98" textAnchor="middle"
         fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">0</text>
-      <text x={lx - 6} y={cy + 14} textAnchor="end"
+      <text x="174" y="98" textAnchor="middle"
         fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">100</text>
     </svg>
   );
