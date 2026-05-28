@@ -56,31 +56,42 @@ function StatusBadge({ status }: { status: string | null }) {
 
 function EIGauge({ value, max = 100 }: { value: number | null; max?: number }) {
   const pct = value != null ? Math.min(value / max, 1) : 0;
-  const angle = pct * 180;
-  const r = 70;
-  const cx = 90; const cy = 90;
+  const r = 60;
+  const cx = 90;
+  const cy = 80;
   const toRad = (deg: number) => (deg * Math.PI) / 180;
-  const startAngle = 180;
-  const endAngle = startAngle - angle;
-  const x1 = cx + r * Math.cos(toRad(startAngle));
-  const y1 = cy + r * Math.sin(toRad(startAngle));
-  const x2 = cx + r * Math.cos(toRad(endAngle));
-  const y2 = cy + r * Math.sin(toRad(endAngle));
-  const largeArc = angle > 180 ? 1 : 0;
+  // Arc goes from 180° (left) to 0° (right) counter-clockwise on top
+  const sweepAngle = pct * 180;
+  const startDeg = 180;
+  const endDeg = 180 - sweepAngle;
+  const x1 = cx + r * Math.cos(toRad(startDeg));
+  const y1 = cy + r * Math.sin(toRad(startDeg));
+  const x2 = cx + r * Math.cos(toRad(endDeg));
+  const y2 = cy + r * Math.sin(toRad(endDeg));
+  const largeArc = sweepAngle > 180 ? 1 : 0;
   const color = value === null ? '#334155' : value >= 85 ? '#34d399' : value >= 70 ? '#f59e0b' : '#f87171';
 
   return (
     <svg width="180" height="100" viewBox="0 0 180 100">
-      <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke="#1e293b" strokeWidth="14" strokeLinecap="round" />
-      {value !== null && (
-        <path d={`M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 0 ${x2} ${y2}`} fill="none" stroke={color} strokeWidth="14" strokeLinecap="round" />
+      {/* Track */}
+      <path
+        d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+        fill="none" stroke="#1e293b" strokeWidth="12" strokeLinecap="round"
+      />
+      {/* Value arc */}
+      {pct > 0 && (
+        <path
+          d={`M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 0 ${x2} ${y2}`}
+          fill="none" stroke={color} strokeWidth="12" strokeLinecap="round"
+        />
       )}
-      <text x={cx} y={cy - 8} textAnchor="middle" fill={color} fontSize="26" fontWeight="bold" fontFamily="Cairo, sans-serif">
+      {/* Value text */}
+      <text x={cx} y={cy - 6} textAnchor="middle" fill={color} fontSize="24" fontWeight="bold" fontFamily="Cairo, sans-serif">
         {value !== null ? value.toFixed(1) : '—'}
       </text>
-      <text x={cx} y={cy + 10} textAnchor="middle" fill="#64748b" fontSize="10" fontFamily="Cairo, sans-serif">Excellence Index</text>
-      <text x="20" y={cy + 18} fill="#64748b" fontSize="9" fontFamily="Cairo, sans-serif">0</text>
-      <text x="152" y={cy + 18} fill="#64748b" fontSize="9" fontFamily="Cairo, sans-serif">100</text>
+      <text x={cx} y={cy + 10} textAnchor="middle" fill="#64748b" fontSize="9" fontFamily="Cairo, sans-serif">Excellence Index / 100</text>
+      <text x={cx - r + 4} y={cy + 20} fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">0</text>
+      <text x={cx + r - 12} y={cy + 20} fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">100</text>
     </svg>
   );
 }
@@ -127,7 +138,7 @@ export function CandidateDetail({ candidate, ojt, fep, fv }: Props) {
   return (
     <div className="min-h-screen bg-slate-950">
       <Header />
-      <div className="max-w-6xl mx-auto px-4 pt-20 pb-16">
+      <div className="max-w-6xl mx-auto px-4 pt-24 pb-16">
 
         <Link href="/admin" className="flex items-center gap-2 text-white/50 hover:text-white mb-6 transition w-fit">
           <ArrowRight className="w-4 h-4" />

@@ -67,7 +67,7 @@ export function AssessorDashboard({ candidates, ojtSubmissions, fepSubmissions, 
   return (
     <div className="min-h-screen bg-slate-950">
       <Header />
-      <div className="max-w-5xl mx-auto px-4 pt-28 pb-12">
+      <div className="max-w-5xl mx-auto px-4 pt-24 pb-12">
 
         {/* Header */}
         <div className="mb-8">

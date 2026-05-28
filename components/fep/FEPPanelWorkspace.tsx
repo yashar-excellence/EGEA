@@ -99,7 +99,7 @@ export function FEPPanelWorkspace({ candidateId }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Link href="/dashboard" className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
+            <Link href="/admin" className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
               <ArrowRight className="w-4 h-4" />
               العودة للوحة التحكم
             </Link>

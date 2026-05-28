@@ -105,10 +105,10 @@ export function AssessorWorkspace({ candidateId }: Props) {
   return (
     <div className="min-h-screen bg-slate-950 pb-12">
       <Header />
-      <div className="max-w-7xl mx-auto px-4 pt-24">
+      <div className="max-w-7xl mx-auto px-4 pt-24 pb-12">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Link href="/dashboard" className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
+            <Link href="/admin" className="text-white/50 hover:text-white flex items-center gap-2 mb-2 transition">
               <ArrowRight className="w-4 h-4" />
               العودة للوحة التحكم
             </Link>
