@@ -246,8 +246,8 @@ export function AdminDashboard({ candidates, ojtSubmissions, fepSubmissions, fvS
                         </td>
                         <td className="px-5 py-3.5">
                           <Link href={`/dashboard/candidates/${c.id}`}
-                            className="flex items-center gap-1 text-xs text-gold-400 hover:text-gold-300 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Eye className="w-3.5 h-3.5" /> عرض
+                            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-gold-500/10 border border-gold-500/20 text-gold-400 hover:bg-gold-500/20 transition-all font-medium">
+                            <Eye className="w-3.5 h-3.5" /> ملف المرشح
                           </Link>
                         </td>
                       </tr>

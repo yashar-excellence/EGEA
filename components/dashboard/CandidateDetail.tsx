@@ -1,19 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import {
   ArrowRight, User, Building2, Award, ClipboardCheck,
   Presentation, MapPin, TrendingUp, CheckCircle2, Clock,
   AlertCircle, BarChart2, Star,
 } from 'lucide-react';
 import { Header } from '@/components/landing/Header';
-
-const RadarChart = dynamic(() => import('recharts').then(m => m.RadarChart), { ssr: false });
-const Radar = dynamic(() => import('recharts').then(m => m.Radar), { ssr: false });
-const PolarGrid = dynamic(() => import('recharts').then(m => m.PolarGrid), { ssr: false });
-const PolarAngleAxis = dynamic(() => import('recharts').then(m => m.PolarAngleAxis), { ssr: false });
-const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false });
+import {
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer,
+} from 'recharts';
 
 interface Phase1Scores {
   epr: number | null; apt: number | null; b5: number | null;
