@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 
-export type UserRole = 'admin' | 'chief_assessor' | 'assessor' | 'viewer';
+export type UserRole = 'admin' | 'chief_assessor' | 'assessor' | 'viewer' | 'award_admin';
 
 export interface User {
   id: string;
@@ -44,6 +44,14 @@ const users: User[] = [
     role: 'viewer',
     organization: 'EGEA',
     passwordHash: bcrypt.hashSync('viewer123', 10),
+  },
+  {
+    id: '5',
+    email: 'award@egea.gov.eg',
+    name: 'هيئة الجائزة',
+    role: 'award_admin',
+    organization: 'جائزة مصر للتميز الحكومي',
+    passwordHash: bcrypt.hashSync('award2024', 10),
   },
 ];
 

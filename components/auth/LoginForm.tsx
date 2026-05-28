@@ -10,6 +10,7 @@ const quickLogins = [
   { label: 'مدير النظام', email: 'admin@egea.gov.eg', password: 'admin123', color: 'text-gold-400' },
   { label: 'رئيس المقيّمين', email: 'chief@egea.gov.eg', password: 'chief123', color: 'text-emerald-400' },
   { label: 'مقيّم', email: 'assessor@egea.gov.eg', password: 'assessor123', color: 'text-blue-400' },
+  { label: 'هيئة الجائزة', email: 'award@egea.gov.eg', password: 'award2024', color: 'text-purple-400' },
 ];
 
 export function LoginForm() {
@@ -95,7 +96,7 @@ export function LoginForm() {
         {/* Quick Login */}
         <div className="border-t border-white/10 pt-4">
           <p className="text-white/30 text-xs text-center mb-3">دخول سريع (تجريبي)</p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {quickLogins.map((q) => (
               <button
                 key={q.email}

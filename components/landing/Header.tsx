@@ -79,6 +79,7 @@ export function Header() {
     if (role === 'admin') return '/admin';
     if (role === 'chief_assessor') return '/dashboard/chief';
     if (role === 'assessor') return '/dashboard/assessor';
+    if (role === 'award_admin') return '/dashboard/award';
     if (role === 'viewer') return '/dashboard';
     return '/dashboard';
   };
