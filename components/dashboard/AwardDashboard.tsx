@@ -5,7 +5,7 @@ import { useState, useMemo } from 'react';
 import {
   Award, Users, TrendingUp, BarChart2, Search,
   Printer, Download, CheckCircle2, Clock, AlertCircle,
-  Star, Crown, ChevronDown, ChevronUp,
+  Star, Crown, ChevronDown, ChevronUp, Loader2, FileText,
 } from 'lucide-react';
 import { Header } from '@/components/landing/Header';
 
@@ -55,6 +55,17 @@ type SortKey = 'ei' | 'name' | 'p1' | 's360';
 
 export function AwardDashboard({ candidates, ojtSubmissions, fepSubmissions, fvSubmissions }: Props) {
   const [search, setSearch] = useState('');
+  const [generating, setGenerating] = useState(false);
+
+  const handleGenerateReport = async (autoprint = false) => {
+    setGenerating(true);
+    try {
+      const url = `/api/reports/full${autoprint ? '?print=1' : ''}`;
+      window.open(url, '_blank');
+    } finally {
+      setTimeout(() => setGenerating(false), 1500);
+    }
+  };
   const [sortKey, setSortKey] = useState<SortKey>('ei');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [phaseFilter, setPhaseFilter] = useState<number | 'all'>('all');
@@ -122,13 +133,24 @@ export function AwardDashboard({ candidates, ojtSubmissions, fepSubmissions, fvS
             <h1 className="text-3xl font-bold text-white">نتائج جائزة مصر للتميز الحكومي</h1>
             <p className="text-white/40 mt-1">عرض شامل لنتائج جميع المرشحين — للقراءة والطباعة فقط</p>
           </div>
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 text-white font-bold hover:opacity-90 transition shadow-lg shadow-purple-500/20 print:hidden"
-          >
-            <Printer className="w-4 h-4" />
-            طباعة التقرير
-          </button>
+          <div className="flex items-center gap-2 print:hidden">
+            <button
+              onClick={() => handleGenerateReport(false)}
+              disabled={generating}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition text-sm"
+            >
+              <FileText className="w-4 h-4 text-purple-400" />
+              عرض التقرير
+            </button>
+            <button
+              onClick={() => handleGenerateReport(true)}
+              disabled={generating}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 text-white font-bold hover:opacity-90 transition shadow-lg shadow-purple-500/20 disabled:opacity-60"
+            >
+              {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
+              {generating ? 'جاري التوليد...' : 'طباعة التقرير'}
+            </button>
+          </div>
         </div>
 
         {/* ── KPI Cards ── */}
