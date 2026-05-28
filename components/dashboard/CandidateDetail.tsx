@@ -55,32 +55,18 @@ function StatusBadge({ status }: { status: string | null }) {
 }
 
 function EIGauge({ value, max = 100 }: { value: number | null; max?: number }) {
-  const W = 220;
-  const H = 130;
-  const cx = W / 2;
-  const cy = H - 20;
-  const R = 80;
-  const strokeW = 14;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-
-  // Track: from 210° to 330° going clockwise (spans 300° — 150° each side of bottom)
-  // Simpler: semicircle from 180° to 0° (left to right) on top half
-  // We use: start = 210°, end = 330° (sweeps 300° through the top)
-  const startDeg = 215;
-  const totalSweep = 290;
+  // Semicircle gauge: arc from left (180°) sweeping to right (0°) counter-clockwise = top half
+  // cx=100, cy=100, R=70 → arc stays within 200x110 box
+  const cx = 100, cy = 100, R = 72, sw = 12;
   const pct = value != null ? Math.min(Math.max(value / max, 0), 1) : 0;
-  const valueSweep = pct * totalSweep;
 
-  const arcPath = (from: number, sweep: number, r: number) => {
-    const s = toRad(from);
-    const e = toRad(from - sweep);
-    const x1 = cx + r * Math.cos(s);
-    const y1 = cy + r * Math.sin(s);
-    const x2 = cx + r * Math.cos(e);
-    const y2 = cy + r * Math.sin(e);
-    const large = sweep > 180 ? 1 : 0;
-    return `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${large} 0 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
-  };
+  // Semicircle: start 180° → end (180 - 180*pct)°
+  // Using SVG arc: from left point to computed end, sweep-flag=1 (clockwise through top)
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const endDeg = 180 - pct * 180;
+  const ex = cx + R * Math.cos(toRad(endDeg));
+  const ey = cy + R * Math.sin(toRad(endDeg));
+  const largeArc = pct > 0.5 ? 1 : 0;
 
   const color = value === null ? '#334155'
     : value >= 85 ? '#34d399'
@@ -88,87 +74,69 @@ function EIGauge({ value, max = 100 }: { value: number | null; max?: number }) {
     : value >= 55 ? '#60a5fa'
     : '#f87171';
 
-  const glowColor = value === null ? 'none'
-    : value >= 85 ? '#34d39944'
-    : value >= 70 ? '#f59e0b44'
-    : value >= 55 ? '#60a5fa44'
-    : '#f8717144';
-
-  const label = value === null ? null
+  const grade = value === null ? null
     : value >= 85 ? 'ممتاز'
     : value >= 70 ? 'جيد جداً'
     : value >= 55 ? 'جيد'
     : 'يحتاج تطوير';
 
-  // Needle tip position
-  const needleDeg = startDeg - valueSweep;
-  const needleR = R - strokeW / 2 - 2;
-  const nx = cx + needleR * Math.cos(toRad(needleDeg));
-  const ny = cy + needleR * Math.sin(toRad(needleDeg));
+  // Needle tip dot on arc end
+  const ndx = cx + (R - sw / 2) * Math.cos(toRad(endDeg));
+  const ndy = cy + (R - sw / 2) * Math.sin(toRad(endDeg));
 
   return (
-    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
+    <svg width="200" height="115" viewBox="0 0 200 115">
       <defs>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="blur" />
+        <filter id="ei-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" result="blur" />
           <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
       </defs>
 
-      {/* Track background */}
-      <path d={arcPath(startDeg, totalSweep, R)}
-        fill="none" stroke="#1e293b" strokeWidth={strokeW + 2} strokeLinecap="round" />
+      {/* Track */}
+      <path d={`M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`}
+        fill="none" stroke="#1e293b" strokeWidth={sw + 4} strokeLinecap="round" />
 
-      {/* Colored fill arc */}
+      {/* Value arc: from left to end, sweep clockwise (flag=1) */}
       {pct > 0 && (
-        <path d={arcPath(startDeg, valueSweep, R)}
-          fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round"
-          filter="url(#glow)" />
+        <path d={`M ${cx - R} ${cy} A ${R} ${R} 0 ${largeArc} 1 ${ex.toFixed(2)} ${ey.toFixed(2)}`}
+          fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round"
+          filter="url(#ei-glow)" />
       )}
 
       {/* Needle dot */}
-      {pct > 0 && (
-        <circle cx={nx.toFixed(2)} cy={ny.toFixed(2)} r="5"
-          fill={color} filter="url(#glow)" />
+      {pct > 0 && pct < 1 && (
+        <circle cx={ndx.toFixed(2)} cy={ndy.toFixed(2)} r="6"
+          fill={color} stroke="#0f172a" strokeWidth="2" filter="url(#ei-glow)" />
       )}
 
-      {/* Center dot */}
-      <circle cx={cx} cy={cy} r="4" fill="#334155" />
-
-      {/* Value */}
-      <text x={cx} y={cy - 28} textAnchor="middle"
-        fill={color} fontSize="30" fontWeight="bold" fontFamily="Cairo, sans-serif">
+      {/* Value number */}
+      <text x={cx} y={cy - 26} textAnchor="middle"
+        fill={color} fontSize="28" fontWeight="bold" fontFamily="Cairo, sans-serif">
         {value !== null ? value.toFixed(1) : '—'}
       </text>
 
-      {/* Label */}
-      {label && (
-        <text x={cx} y={cy - 8} textAnchor="middle"
-          fill={color} fontSize="11" fontFamily="Cairo, sans-serif" opacity="0.85">
-          {label}
+      {/* Grade label */}
+      {grade && (
+        <text x={cx} y={cy - 6} textAnchor="middle"
+          fill={color} fontSize="11" fontFamily="Cairo, sans-serif" opacity="0.9">
+          {grade}
         </text>
       )}
 
-      {/* Sub label */}
-      <text x={cx} y={cy + 10} textAnchor="middle"
+      {/* Excellence Index subtitle */}
+      <text x={cx} y={cy + 14} textAnchor="middle"
         fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">
-        Excellence Index
+        Excellence Index / 100
       </text>
 
-      {/* 0 and 100 labels */}
-      {(() => {
-        const s0 = toRad(startDeg);
-        const s100 = toRad(startDeg - totalSweep);
-        const lr = R + 14;
-        return (
-          <>
-            <text x={(cx + lr * Math.cos(s0)).toFixed(1)} y={(cy + lr * Math.sin(s0)).toFixed(1)}
-              textAnchor="middle" fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">0</text>
-            <text x={(cx + lr * Math.cos(s100)).toFixed(1)} y={(cy + lr * Math.sin(s100)).toFixed(1)}
-              textAnchor="middle" fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">100</text>
-          </>
-        );
-      })()}
+      {/* 0 label bottom-left */}
+      <text x={cx - R - 2} y={cy + 16} textAnchor="end"
+        fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">0</text>
+
+      {/* 100 label bottom-right */}
+      <text x={cx + R + 2} y={cy + 16} textAnchor="start"
+        fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">100</text>
     </svg>
   );
 }
