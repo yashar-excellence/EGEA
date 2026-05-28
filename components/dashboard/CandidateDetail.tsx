@@ -55,17 +55,21 @@ function StatusBadge({ status }: { status: string | null }) {
 }
 
 function EIGauge({ value, max = 100 }: { value: number | null; max?: number }) {
-  // Semicircle gauge: arc from left (180°) sweeping to right (0°) counter-clockwise = top half
-  // cx=100, cy=100, R=70 → arc stays within 200x110 box
-  const cx = 100, cy = 100, R = 72, sw = 12;
+  const cx = 100, cy = 95, R = 70, sw = 13;
   const pct = value != null ? Math.min(Math.max(value / max, 0), 1) : 0;
 
-  // Semicircle: start 180° → end (180 - 180*pct)°
-  // Using SVG arc: from left point to computed end, sweep-flag=1 (clockwise through top)
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const endDeg = 180 - pct * 180;
-  const ex = cx + R * Math.cos(toRad(endDeg));
-  const ey = cy + R * Math.sin(toRad(endDeg));
+  // Full track: right (0°) → left (180°) counter-clockwise through top
+  // SVG: M right_point A R R 0 0 0 left_point   (sweep=0 = counter-clockwise)
+  const rx = cx + R, ry = cy;   // right = (170, 95)
+  const lx = cx - R, ly = cy;   // left  = (30,  95)
+
+  // Value arc end point: starts at right (0°=east), rotates counter-clockwise
+  // angle from east going counter-clockwise = pct * 180°
+  const endAngleDeg = pct * 180; // 0 = right, 90 = top, 180 = left
+  const endRad = (endAngleDeg * Math.PI) / 180;
+  const ex = cx + R * Math.cos(Math.PI - endRad); // mirror: starts right goes left
+  const ey = cy - R * Math.sin(endRad);            // negative sin = upward
+
   const largeArc = pct > 0.5 ? 1 : 0;
 
   const color = value === null ? '#334155'
@@ -80,62 +84,56 @@ function EIGauge({ value, max = 100 }: { value: number | null; max?: number }) {
     : value >= 55 ? 'جيد'
     : 'يحتاج تطوير';
 
-  // Needle tip dot on arc end
-  const ndx = cx + (R - sw / 2) * Math.cos(toRad(endDeg));
-  const ndy = cy + (R - sw / 2) * Math.sin(toRad(endDeg));
-
   return (
-    <svg width="200" height="115" viewBox="0 0 200 115">
+    <svg width="200" height="110" viewBox="0 0 200 110">
       <defs>
-        <filter id="ei-glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="4" result="blur" />
+        <filter id="ei-glow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="3.5" result="blur" />
           <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
       </defs>
 
-      {/* Track */}
-      <path d={`M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`}
+      {/* Grey track: right → left, counter-clockwise (sweep=0) */}
+      <path d={`M ${rx} ${ry} A ${R} ${R} 0 0 0 ${lx} ${ly}`}
         fill="none" stroke="#1e293b" strokeWidth={sw + 4} strokeLinecap="round" />
 
-      {/* Value arc: from left to end, sweep clockwise (flag=1) */}
+      {/* Value arc: right → end, counter-clockwise */}
       {pct > 0 && (
-        <path d={`M ${cx - R} ${cy} A ${R} ${R} 0 ${largeArc} 1 ${ex.toFixed(2)} ${ey.toFixed(2)}`}
+        <path d={`M ${rx} ${ry} A ${R} ${R} 0 ${largeArc} 0 ${ex.toFixed(2)} ${ey.toFixed(2)}`}
           fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round"
           filter="url(#ei-glow)" />
       )}
 
-      {/* Needle dot */}
-      {pct > 0 && pct < 1 && (
-        <circle cx={ndx.toFixed(2)} cy={ndy.toFixed(2)} r="6"
-          fill={color} stroke="#0f172a" strokeWidth="2" filter="url(#ei-glow)" />
+      {/* Dot at arc tip */}
+      {pct > 0.02 && pct < 0.98 && (
+        <circle cx={ex.toFixed(2)} cy={ey.toFixed(2)} r="7"
+          fill={color} stroke="#0f172a" strokeWidth="2.5" filter="url(#ei-glow)" />
       )}
 
-      {/* Value number */}
-      <text x={cx} y={cy - 26} textAnchor="middle"
+      {/* Value */}
+      <text x={cx} y={cy - 22} textAnchor="middle"
         fill={color} fontSize="28" fontWeight="bold" fontFamily="Cairo, sans-serif">
         {value !== null ? value.toFixed(1) : '—'}
       </text>
 
-      {/* Grade label */}
+      {/* Grade */}
       {grade && (
-        <text x={cx} y={cy - 6} textAnchor="middle"
-          fill={color} fontSize="11" fontFamily="Cairo, sans-serif" opacity="0.9">
+        <text x={cx} y={cy - 4} textAnchor="middle"
+          fill={color} fontSize="11" fontFamily="Cairo, sans-serif" opacity="0.85">
           {grade}
         </text>
       )}
 
-      {/* Excellence Index subtitle */}
+      {/* Subtitle */}
       <text x={cx} y={cy + 14} textAnchor="middle"
         fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">
         Excellence Index / 100
       </text>
 
-      {/* 0 label bottom-left */}
-      <text x={cx - R - 2} y={cy + 16} textAnchor="end"
+      {/* 0 at right, 100 at left — matching arc direction */}
+      <text x={rx + 6} y={cy + 14} textAnchor="start"
         fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">0</text>
-
-      {/* 100 label bottom-right */}
-      <text x={cx + R + 2} y={cy + 16} textAnchor="start"
+      <text x={lx - 6} y={cy + 14} textAnchor="end"
         fill="#475569" fontSize="9" fontFamily="Cairo, sans-serif">100</text>
     </svg>
   );
